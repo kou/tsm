@@ -42,7 +42,7 @@ tsm（Tuple Space in Scheme）は
 == 依存ライブラリ
 
   * ((<dsm|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=dsm>))
-  * ((<marshal|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=marshal>))
+  * ((<msm|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=msm>))
 
 == 入手方法
 
