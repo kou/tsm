@@ -48,7 +48,7 @@ tsm（Tuple Space in (on??) Scheme）は
 
 #((<URL:http://www.cozmixng.org/~kou/download/tsm.tar.gz>))
 
-  % svn co http://www.cozmixng.org/repos/gauche/tsm/trunk dsm
+  % svn co http://www.cozmixng.org/repos/gauche/tsm/trunk tsm
 
 == インストール
 
