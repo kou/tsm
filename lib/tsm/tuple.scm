@@ -1,7 +1,8 @@
 (define-module tsm.tuple
-  (extend util.match)
+  (extend util.match tsm.tsm)
   (use srfi-1)
   (use srfi-19)
+  (use tsm.common)
   (export make-tuple
           tuple-expired? tuple-match?
           value-of))
@@ -31,15 +32,8 @@
        (time<? (expiration-time-of tuple)
                (current-time))))
 
-(define-macro (tuple-match? tuple . patterns)
+(define-macro (tuple-match? tuple patterns)
   `(match (value-of ,tuple)
-     ,@(map (lambda (pat)
-              (list (car pat) #t))
-            patterns)
-     ,@(if (find (lambda (pattern)
-                   (symbol? (car pattern)))
-                 patterns)
-         '()
-         '((_ #f)))))
+     ,@(patterns->boolean-match-patterns patterns)))
 
 (provide "tsm/tuple")
