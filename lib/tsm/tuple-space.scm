@@ -67,12 +67,14 @@
           (current-time))))
 
 (define (ts-write space value . args)
+  ;; (print "write:" value)
   (let-optionals* args ((sec #f))
     (push! (tuples-of space)
            (make-tuple value :expiration-time sec))))
 
 
 (define (ts-search space patterns need-more?)
+  ;; (print "search:" patterns)
   (let ((matched? #f))
     (parameterize ((current-patterns patterns))
       (partition (lambda (tuple)

@@ -73,26 +73,25 @@
              (finished? #f)
              (sequence 0)
              (tower-id '_)
-             (actions (make-queue)))
+             (actions (make-queue))
+             (unique-symbol (gensym)))
         (define (next-action)
           (if finished?
             #f
-            (begin
-              (with-error-handler
-                  (lambda (e) #f)
-                (lambda ()
-                  (match (tuple-space-take tuple-space
-                                           `((:tower-action ,tower-id ,sequence
-                                                            (_ ...)))
-                                           :timeout 100000)
-                    ((_ id seq action)
-                     (print seq)
-                     (inc! sequence)
-                     (set! tower-id id)
-                     action)
-                    (not-match
-                     (print "not match:" not-match)
-                     #f)))))))
+            (match (tuple-space-take tuple-space
+                                     `((:tower-action ,tower-id ,sequence
+                                                      (_ ...)))
+                                     1000000 unique-symbol)
+              ((_ id seq action)
+               (print seq)
+               (inc! sequence)
+               (set! tower-id id)
+               action)
+              (not-match
+               (if (eq? not-match unique-symbol)
+                 (print "timeout")
+                 (print "not match:" not-match))
+               #f))))
           
         (gtk-widget-set-size-request area width hight)
         (gtk-container-add w area)

@@ -52,8 +52,8 @@
 (define-macro (define-tuple-space-getter name)
   `(define-method ,(string->symbol #`"tuple-space-,|name|")
        ((self <tuple-space-proxy>) patterns . args)
-     (let-keywords* args ((timeout #f)
-                          (fallback unique-symbol))
+     (let-optionals* args ((timeout #f)
+                           (fallback unique-symbol))
        (command-with-timeout self ,#`"/,|name|"
                              patterns timeout fallback))))
 

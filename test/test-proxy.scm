@@ -48,23 +48,18 @@
     ("take test"
      (assert-each (lambda (item)
                     (tuple-space-write space item)
-                    (assert-equal item (tuple-space-take space (list item)
-                                                         :timeout 1000))
+                    (assert-equal item
+                                  (tuple-space-take space (list item) 1000))
                     (assert-error (lambda ()
-                                    (tuple-space-take space (list item)
-                                                      :timeout 1000)))
+                                    (tuple-space-take space (list item) 1000)))
                     (assert-false (tuple-space-take space (list item)
-                                                    :timeout 1000
-                                                    :fallback #f)))
+                                                    1000 #f)))
                   '(1 (1 2) #(1 2) "str" sym)
                   :apply-if-can #f))
     ("read test"
      (assert-error (lambda ()
-                     (tuple-space-read space '(_)
-                                       :timeout 1000)))
-     (assert-false (tuple-space-read space '(_)
-                                     :timeout 1000
-                                     :fallback #f))
+                     (tuple-space-read space '(_) 1000)))
+     (assert-false (tuple-space-read space '(_) 1000 #f))
      (assert-each (lambda (item)
                     (tuple-space-write space item)
                     (assert-equal item (tuple-space-read space (list item)))

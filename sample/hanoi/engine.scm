@@ -13,8 +13,7 @@
     (let ((tuple-space (tuple-space-connect #`"dsmp://,|server|:,|*port*|")))
       (define (do-command tower-id command . args)
         (tuple-space-write tuple-space
-                           `(:tower-do ,tower-id ,command ,@args)
-                           60))
+                           `(:tower-do ,tower-id ,command ,@args)))
       (define (tower-id->command id)
         (lambda (command . args)
           (cond ((eq? 'id command)

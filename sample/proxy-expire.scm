@@ -7,9 +7,9 @@
 
 (define (main args)
   (let ((tuple-space (tuple-space-connect #`"dsmp://,|*server*|:,|*port*|")))
-    (tuple-space-write tuple-space '(1 2 3) 1)
+    (tuple-space-write tuple-space '(1 2 3) '(1 0))
     (print "waiting...")
-    (sys-sleep 2)
+    (sys-sleep 1)
     (print "wake up")
-    (print (tuple-space-take tuple-space '((1 _ _)) 1))
-    ))
+    (print (tuple-space-take tuple-space '((1 _ _)) 1000 "not found"))
+    (print (tuple-space-take tuple-space '((1 _ _)) 1000))))

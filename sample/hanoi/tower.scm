@@ -28,8 +28,7 @@
                   (let ((disk (pop! (disks-of tower))))
                     (pop-handler tower tuple-space disk)
                     (tuple-space-write tuple-space
-                                       (list :tower (id-of tower) disk)
-                                       60)
+                                       (list :tower (id-of tower) disk))
                     #f))))
           ((_ _ 'push disk)
            (push! (disks-of tower) disk)
