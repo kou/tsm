@@ -1,6 +1,7 @@
 (define-module tsm.tuple-space
   (use srfi-1)
   (use srfi-11)
+  (use srfi-19)
   (use gauche.parameter)
   (use tsm.tuple)
   (use dsm.server)
@@ -19,7 +20,12 @@
 
 (define-class <tuple-space> ()
   ((server :accessor server-of)
-   (tuples :accessor tuples-of :init-form '())))
+   (tuples :accessor tuples-of :init-form '())
+   (last-update-time :accessor last-update-time-of
+                     :init-form (current-time))
+   (minimum-update-nanosecond :accessor minimum-update-nanosecond-of
+                              :init-keyword :minimum-update-nanosecond
+                              :init-value 500000)))
 
 (define (make-tuple-space uri . keywords)
   (let ((server (apply make-dsm-server uri keywords))
@@ -45,20 +51,24 @@
   (dsm-server-stop! (server-of space)))
 
 (define (update-tuple-space! space)
-  (set! (tuples-of space)
-        (remove tuple-expired? (tuples-of space))))
-
+  (when (< (minimum-update-nanosecond-of space)
+           (time-nanosecond
+            (time-difference (current-time) (last-update-time-of space))))
+    (set! (tuples-of space)
+          (remove tuple-expired? (tuples-of space)))
+    (set! (last-update-time-of space)
+          (current-time))))
 
 (use gauche.interactive)
 (define (ts-write space lst . args)
-  (p "write" lst)
+  (print "write" lst)
   (let-optionals* args ((sec #f))
     (push! (tuples-of space)
            (make-tuple lst :expiration-time sec))))
 
 
 (define (ts-search space pattern need-more?)
-  (p "search" pattern)
+  (print "search" pattern)
   (let ((matched? #f))
     (parameterize ((current-patterns pattern))
       (partition (lambda (tuple)
