@@ -20,10 +20,10 @@ GPL or BSD License
 
 == なにこれ？
 
-tsm（Tuple Space in (on??) Scheme）は
-((<dsm|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=dsm>))
-を用いたタプルスペースライブラリです．インタフェースは
-((<Rinda|URL:http://www2a.biglobe.ne.jp/~seki/ruby/rinda.html>))
+tsm（Tuple Space in Scheme）は
+((<dsm|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=dsm>)) 
+を用いたタプルスペースライブラリです．インターフェイスは
+((<Rinda|URL:http://www2a.biglobe.ne.jp/~seki/ruby/rinda.html>)) 
 を参考にしています．
 
 以下のような機能があります．
@@ -184,13 +184,13 @@ Aが起動するとBが（タグを除いた）タプルの内容を出力して終了し
 
 順序を変えてA，Bの順序で起動します．
 
-  % client-a.scm
+  % gosh client-a.scm
 
 Aはタプルを書き込んですぐに終了します．
 
 続いてBを起動します．
 
-  % client-b.scm
+  % gosh client-b.scm
 
 Bが指定したパターンのタプルがすでにタプルスペース上に存在する
 のですぐにタプルの内容を出力して終了します．
@@ -269,7 +269,7 @@ reader.scmはどのような順序で起動しても構いません．writer.scm
 
 (use tsm.tuple-space)をするタスクのことです．
 
-#--- make-tuple-space(URI, &optional, minimum-update-ranosecond)
+#--- make-tuple-space(URI &optional minimum-update-ranosecond)
 --- make-tuple-space(URI)
      ((|URI|))にバインドされたタプルスペースを作成します．
 
@@ -295,7 +295,7 @@ reader.scmはどのような順序で起動しても構いません．writer.scm
      ((|proxy|))が接続しているタプルスペースとの接続を切断し
      ます．
 
---- tuple-space-write(proxy, value, &optional, (timeout #f))
+--- tuple-space-write(proxy value &optional (timeout #f))
      ((|proxy|))が接続しているタプルスペースにタプルとして
      ((|value|))を書き込みます．書き込んだタプルは長くても
      ((|timeout|))で指定された期間だけタプルスペースに存在し
@@ -306,7 +306,7 @@ reader.scmはどのような順序で起動しても構いません．writer.scm
      す．((|timeout|))には，マイクロ秒を表す実数か，秒とマイ
      クロ秒を表すふたつの整数のリストを指定します．
 
---- tuple-space-take(proxy, patterns, &optional, (timeout #f), fallback)
+--- tuple-space-take(proxy patterns &optional (timeout #f) fallback)
      ((|proxy|))が接続しているタプルスペース中の
      ((|patterns|))にマッチするパターンをひとつ取り出します．
      取り出されたタプルはタプルスペースから削除されます．
@@ -322,11 +322,11 @@ reader.scmはどのような順序で起動しても構いません．writer.scm
      ((|timeout|))には，マイクロ秒を表す実数か，秒とマイ
      クロ秒を表すふたつの整数のリストを指定します．
 
---- tuple-space-read(proxy, patterns, &optional, (timeout #f), fallback)
+--- tuple-space-read(proxy patterns &optional (timeout #f) fallback)
      見つかったタプルをタプルスペースから削除しない点だけが
      (({tuple-space-read}))と異なります．
 
---- tuple-space-read-all(proxy, patterns)
+--- tuple-space-read-all(proxy patterns)
      ((|proxy|))が接続しているタプルスペース中で
      ((|patterns|))にマッチするタプルのリストを返します．
      ((|patterns|))はutil.matchと同じ書式です．
