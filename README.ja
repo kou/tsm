@@ -269,9 +269,13 @@ reader.scmはどのような順序で起動しても構いません．writer.scm
 
 (use tsm.tuple-space)をするタスクのことです．
 
-#--- make-tuple-space(URI &optional minimum-update-ranosecond)
---- make-tuple-space(URI)
+--- make-tuple-space(URI &keyword :minimum-update-nanosecond)
      ((|URI|))にバインドされたタプルスペースを作成します．
+     
+     キーワード引数((|:minimum-update-nanosecond|))にはタプ
+     ルスペースが期限切れのタプルを削除する間隔をナノ秒で指
+     定します．省略した場合は60秒（60,000,000ナノ秒）が用い
+     られます．
 
 --- tuple-space-start!(tuple-space)
      ((|tuple-space|))を起動します．

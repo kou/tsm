@@ -15,6 +15,8 @@
 (define current-patterns (make-parameter #f))
 (define ts-module (current-module))
 
+(define default-minimum-update-nanosecond (* 60 1000 1000))
+
 (define-macro (current-tuple-match?)
   '(eval '(eval `(tuple-match? ,(current-tuple) ,(current-patterns))
                 ts-module)
@@ -27,7 +29,7 @@
                      :init-form (current-time))
    (minimum-update-nanosecond :accessor minimum-update-nanosecond-of
                               :init-keyword :minimum-update-nanosecond
-                              :init-value 500000)))
+                              :init-value default-minimum-update-nanosecond)))
 
 (define (make-tuple-space uri . keywords)
   (let-keywords* keywords ((minimum-update-nanosecond #f))
