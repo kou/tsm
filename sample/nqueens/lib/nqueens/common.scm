@@ -50,9 +50,21 @@
   (apply + (map (lambda (old new)
 		  (cond ((equal? old new) 0)
 			((and new (not old)) 1)
-			((and old (not new)) -1)
+			((and old(not (equal? old new)))
+                         (errorf "??? bad compare: old<~s>, new<~s>"
+                                 old new))
 			(else 0)))
 		old-queens
 		new-queens)))
+
+(define (next-queen-position old-queens new-queens)
+  (apply values
+         (let/cc return
+           (for-each-with-index (lambda (i old new)
+                                  (if (and (not old) new)
+                                    (return (list i new))))
+                                old-queens
+                                new-queens)
+           '(#f #f))))
 
 (provide "nqueens/common")
