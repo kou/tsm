@@ -1,0 +1,138 @@
+\documentclass[a4paper]{jarticle}
+
+\oddsidemargin = 0mm
+\headheight = 0mm
+\topmargin = 0mm
+\headsep = 0mm
+\marginparwidth = 0mm
+\textwidth = 165mm
+\textheight = 245mm
+
+\usepackage{alltt}
+\usepackage{graphicx}
+
+\begin{document}
+
+\begin{flushright}
+ 2004年8月7日 \\
+ Lightweight Language Weekend 2004 \\
+ 須藤功平（COZMIXNG）
+\end{flushright}
+
+\section{n-Queensゲーム}
+
+\subsection{方針}
+
+自分のターンではない時でも，現在の盤の状況から到達可能な手をリストアップ
+し続ける．つまり，少しでも多くの手を計算しておけば有理なのではないかとい
+う（誰でも考え付く）「下手な鉄砲数うちゃ当たる作戦」である．
+
+そのために，複数のプロセスを起動し\footnote{Gaucheの用いているBoehm GCは
+FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
+を言わせて手をリストアップする．各プロセスはタプルスペースを用いて通信を
+行う．
+
+\subsection{出演者}
+
+今回のプログラムにおける各出演者の関係を図~\ref{fig:system-architecture}
+に示す．
+\begin{figure}[b]
+ \begin{center}
+  \includegraphics[width=0.5\textwidth]{system-architecture.eps}
+  \caption{システム構成}
+  \label{fig:system-architecture}
+ \end{center}
+\end{figure}
+
+\begin{description}
+ \item[プレイヤー] n-Queensサーバと通信し，実際にn-Queensゲームをプレイ
+	    する．
+   
+	    しかし，どこにQueenをおけばよいかは考えずに，現在の盤の状態
+	    をタプルスペースに書き，解答者が解いてくれるのを待つ．自分の
+	    ターンになったら解答者が解いた解答をタプルスペースからかき集
+	    め，その中から適当な解答を選択する．自分のターンに置くQueen
+	    はその解答を元に決める．
+   
+	    適当な解答は以下のように選択する．上にあるものほど優先順
+	    位が高い．
+	    \begin{enumerate}
+	     \item 次のターンで終了する解答
+	     \item 次の自分のターンが来るまでに終了する解答
+	     \item 自分のターンでは終了しない解答
+	     \item かき集めた中の最初の解答
+	    \end{enumerate}
+
+ \item[出題者] プレイヤーがタプルスペースに書いた盤の状態をサブ問題に分
+	    割し，サブ問題をタプルスペースに書く．
+   
+	    出題者は以下のようなサブ問題を作成する．
+	    \begin{itemize}
+	     \item 元の盤の状態から始めて，もうこれ以上Queenが置けなくな
+		   る盤の状態を全て求める問題．
+	     \item 元の盤の状態に加えて，（Queenを置ける場所に）適当に
+		   Queenをひとつ置いた状態から始めて，もうこれ以上Queen 
+		   が置けなくなる盤の状態を全て求める問題．
+	    \end{itemize}
+
+ \item[解答者] 出題者が作成したサブ問題を解いて，解答をタプルスペースに
+	    書いていく．
+   
+	    以下のどちらかの条件を満たすまでサブ問題を解き続ける．
+	    \begin{itemize}
+	     \item 現在の盤の状態からどんな手順を踏んでも，与えられたサ
+		   ブ問題と同じ状態にならない．
+	     \item 解答を全て生成した．
+	    \end{itemize}
+
+ \item[タプルスペース] プレイヤー，出題者，解答者が通信するための場所を
+	    提供する．プレイヤー，出題者，解答者がどのように通信している
+	    かには一切関知しない．
+
+\end{description}
+
+\section{プログラム}
+   
+前置きはこのぐらいにしてプログラムの解説に入る．
+
+今回のプログラムで一番大事な部分はタプルスペースを用いた「下手な鉄砲数う
+ちゃ当たる作戦」であるが，これはSchemeっぽくないのでプログラム中で使用し
+ている継続\footnote{こっちの方がSchemeっぽいでしょ？}について解説する．
+
+以下は解答者オブジェクト（実体は手続き）を作成するコードである．
+
+\begin{alltt}
+(define (make-answerer queens width height)
+  (define return #f)
+
+  (define (next)
+    (available-hands queens width height
+                     (lambda (hand)
+                       (let/cc restart
+                         (set! next
+                               (lambda ()
+                                 (restart 'do-next)))
+                         (return hand))))
+    (return #f))
+
+  (lambda ()
+    (let/cc cont
+      (set! return cont)
+      (next))))
+\end{alltt}
+
+以下のように使用する．
+
+\begin{alltt}
+(define answerer (make-answerer \textbf{盤の状態} \textbf{盤の幅} \textbf{盤の高さ}))
+(answerer) ;; -> 最初に見付けた解
+\begin{math}\cdots\end{math}
+(answerer) ;; -> 最後に見付けた解
+(answerer) ;; -> #f
+\begin{math}\cdots\end{math}
+\end{alltt}
+
+む，やはり解説は当日までとっておくことにしよう．それを書くにはこの余白は
+あまりにも狭すぎる．
+
+\end{document}

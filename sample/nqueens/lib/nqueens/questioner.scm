@@ -2,6 +2,7 @@
   (use srfi-1)
   (use srfi-11)
   (use srfi-27)
+  (use gauche.sequence)
   (use tsm.proxy)
   (use nqueens.common)
   (export make-nqueens-questioner nqueens-questioner-write-question))
@@ -15,6 +16,7 @@
 
 (define (nqueens-questioner-write-question questioner)
   (let-values (((width height queens) (take-current-queens questioner)))
+    (write-question questioner queens width height)
     (for-each-with-index
      (lambda (column queen)
        (unless queen

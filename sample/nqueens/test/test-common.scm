@@ -52,4 +52,9 @@
    (assert-values-equal '(0 1)
                         (lambda () (next-queen-position '(#f #f) '(1 3))))
    (assert-values-equal '(#f #f)
-                        (lambda () (next-queen-position '(1 3) '(1 3))))))
+                        (lambda () (next-queen-position '(1 3) '(1 3)))))
+  ("queens->pattern test"
+   (assert-equal '() (queens->pattern '()))
+   (assert-equal '(_ 1 _) (queens->pattern '(#f 1 #f)))
+   (assert-equal '(_ 1 _ 2) (queens->pattern '(#f 1 #f 2)))
+   (assert-equal '(0 _ _ 1) (queens->pattern '(0 #f #f 1)))))

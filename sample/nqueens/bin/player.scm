@@ -1,6 +1,6 @@
 #!/usr/bin/env gosh
 
-(use nqueens.client)
+(use nqueens.player)
 
 (define *tuple-space-host* "localhost")
 (define *tuple-space-port* 5959)
@@ -10,7 +10,7 @@
 (define *xml-rpc-path* "/RPC2")
 
 (define (main args)
-  (nqueens-play "Gauche n-Queens client"
+  (nqueens-play "Gauche n-Queens player"
                 (format #f "http://~a:~a~a"
                         *xml-rpc-host* *xml-rpc--port* *xml-rpc-path*)
                 (format #f "dsmp://~a:~a"

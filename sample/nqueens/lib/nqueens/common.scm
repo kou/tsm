@@ -1,5 +1,6 @@
 (define-module nqueens.common
   (use srfi-1)
+  (use util.match)
   (use gauche.sequence)
   (use tsm.proxy)
   (export-all))
@@ -44,11 +45,9 @@
   (and (not (column-has-queen? queens column))
        (not (row-has-queen? queens row))
        (let loop ((i 0))
-         (if (= i width)
-           #t
-           (if (cell-in-diagonal-line? queens i column row)
-             #f
-             (loop (+ i 1)))))))
+         (or (= i width)
+             (and (not (cell-in-diagonal-line? queens i column row))
+                  (loop (+ i 1)))))))
 
 (define (update-queens queens column row)
   (map-to-with-index (class-of queens)
@@ -81,15 +80,20 @@
 
 (define (x-current-queens x tuple-space-client . args)
   (apply values
-         (cdr (match (apply x
-                            (tuple-space-of tuple-space-client)
-                            '(:current _ _ _)
-                            args)))))
+         (cdr (apply x
+                     (tuple-space-of tuple-space-client)
+                     '(:current _ _ _)
+                     args))))
 
 (define (take-current-queens tuple-space-client . args)
   (apply x-current-queens tuple-space-take tuple-space-client args))
 
 (define (read-current-queens tuple-space-client . args)
   (apply x-current-queens tuple-space-read tuple-space-client args))
+
+(define (queens->pattern queens)
+  (map (lambda (queen)
+         (or queen '_))
+       queens))
 
 (provide "nqueens/common")

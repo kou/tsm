@@ -12,31 +12,32 @@
   (make <nqueens-answerer> :uri uri))
 
 (define (nqueens-answerer-write-answers nq-answerer)
-  (let-values (((width height queens)
+  (let-values (((width height first-queens)
                 (read-current-queens nq-answerer)))
-    (let ((answerer (make-answerer width height queens)))
-      (let loop ((current-queens queens)
+    (let ((answerer (make-answerer width height first-queens)))
+      (let loop ((current-queens first-queens)
                  (answer (answerer)))
+        (print answer)
         (when answer
-          (answerer-write-answer nq-answerer width height answer)
+          (write-answer nq-answerer width height answer)
           (let-values (((_ _ new-queens)
-                        (read-current-queens answerer 0 '(_ #f #f #f))))
+                        (read-current-queens nq-answerer
+                                             0
+                                             '(_ #f #f #f))))
             (if (or (not new-queens)
-                    (equal? new-queens current-queens))
+                    (equal? first-queens currnet-queens))
               (loop current-queens (answerer)))))))))
 
-(define (nqueens-answerer-write-answer nq-answerer queens)
+(define (write-answer nq-answerer width height queens)
   (tuple-space-write (tuple-space-of nq-answerer)
                      `(:answer ,width ,height ,queens)
-                     `(,(* 100 *available-second*) 0)))
+                     `(,(* width *available-second*) 0)))
 
-(define (make-answerer width height . queens)
+(define (make-answerer queens width height)
   (define return #f)
 
   (define (next)
-    (available-hands (get-optional queens (make-list width #f))
-                     width
-                     height
+    (available-hands queens width height
                      (lambda (hand)
                        (let/cc restart
                          (set! next
