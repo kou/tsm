@@ -1,6 +1,7 @@
 (define-module nqueens.common
   (use srfi-1)
   (use gauche.sequence)
+  (use tsm.proxy)
   (export-all))
 (select-module nqueens.common)
 
@@ -11,6 +12,17 @@
        (call/cc
 	(lambda (var)
 	  body ...))))))
+
+(define *available-second* 10)
+
+(define-class <tuple-space-client> ()
+  ((uri :accessor uri-of :init-keyword :uri)
+   (tuple-space :accessor tuple-space-of)))
+
+(define-method initialize ((self <tuple-space-client>) args)
+  (next-method)
+  (set! (tuple-space-of self)
+        (tuple-space-connect (uri-of self))))
 
 (define (column-has-queen? queens column)
   (number? (ref queens column)))
@@ -28,11 +40,11 @@
          (or (= queen (+ cell-row step))
              (= queen (- cell-row step))))))
   
-(define (cell-free? queens n m column row)
+(define (cell-free? queens width height column row)
   (and (not (column-has-queen? queens column))
        (not (row-has-queen? queens row))
        (let loop ((i 0))
-         (if (= i n)
+         (if (= i width)
            #t
            (if (cell-in-diagonal-line? queens i column row)
              #f
@@ -66,5 +78,18 @@
                                 old-queens
                                 new-queens)
            '(#f #f))))
+
+(define (x-current-queens x tuple-space-client . args)
+  (apply values
+         (cdr (match (apply x
+                            (tuple-space-of tuple-space-client)
+                            '(:current _ _ _)
+                            args)))))
+
+(define (take-current-queens tuple-space-client . args)
+  (apply x-current-queens tuple-space-take tuple-space-client args))
+
+(define (read-current-queens tuple-space-client . args)
+  (apply x-current-queens tuple-space-read tuple-space-client args))
 
 (provide "nqueens/common")

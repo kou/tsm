@@ -14,7 +14,7 @@
                                          (push! hands hand))))))
     (assert-lset-equal excepted hands)))
 
-(define-assertion (assert-nqueens-answerer excepted answerer . args)
+(define-assertion (assert-answerer excepted answerer . args)
   (assert-lset-equal excepted
                      (let loop ((result (answerer))
                                 (hands '()))
@@ -46,18 +46,18 @@
                              (2 0 #f) (2 #f 1)
                              (#f 0 2) (#f 1 #f) (#f 2 0))
                            available-hands '(#f #f #f) 3 3))
-  ("nqueens-answerer test"
-   (assert-nqueens-answerer '((0 2 #f) (0 #f 1)
+  ("make-answerer test"
+   (assert-answerer '((0 2 #f) (0 #f 1)
                               (1 #f 0) (1 #f 2)
                               (2 0 #f) (2 #f 1)
                               (#f 0 2) (#f 1 #f) (#f 2 0))
-                            (nqueens-answerer 3 3))
-   (assert-nqueens-answerer '((0) (1) (2))
-                            (nqueens-answerer 1 3))
-   (assert-nqueens-answerer '((0 #f #f)
+                            (make-answerer 3 3))
+   (assert-answerer '((0) (1) (2))
+                            (make-answerer 1 3))
+   (assert-answerer '((0 #f #f)
                               (#f 0 #f)
                               (#f #f 0))
-                            (nqueens-answerer 3 1))
-   (assert-nqueens-answerer '((0 #f 1) (0 2 #f))
-                            (nqueens-answerer 3 3 '(0 #f #f)))))
+                            (make-answerer 3 1))
+   (assert-answerer '((0 #f 1) (0 2 #f))
+                            (make-answerer 3 3 '(0 #f #f)))))
 

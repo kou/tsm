@@ -11,7 +11,7 @@
   ((server :accessor server-of)
    (minimum-update-nanosecond :accessor minimum-update-nanosecond-of
                               :init-keyword :minimum-update-nanosecond
-                              :init-value 5000000)))
+                              :init-value 500000000)))
 
 (define-method initialize ((self <tuple-space-proxy>) args)
   (next-method)

@@ -4,14 +4,13 @@
   (use srfi-13)
   (use util.list)
   (use gauche.sequence)
+  (use tsm.proxy)
   (use xsm.xml-rpc.client)
   (use nqueens.common)
   (export nqueens-play))
 (select-module nqueens.client)
 
 (define get hash-table-get)
-
-(define *available-time* 10)
 
 (define-class <nqueens-client> ()
   ((name :accessor name-of :init-keyword :name)
@@ -35,17 +34,20 @@
         (tuple-space-connect (tuple-space-uri-of self)))
   (regist! self))
 
-(define (nqueens-play name uri)
-  (let ((client (make <nqueens-client> :name name :uri uri)))
+(define (nqueens-play name xml-rpc-uri tuple-space-uri)
+  (let ((client (make <nqueens-client>
+                  :name name
+                  :xml-rpc-uri xml-rpc-uri
+                  :tuple-space-uri tuple-space-uri)))
     (ensure-regist! client)
     (wait-play client)
     (update-field-info! client)
     (let play-loop ((playing? #t))
       (when playing?
-        (let loop ((rest-time *available-time*)
+        (let loop ((rest-time *available-second*)
                    (rest-players-number (length (players-of client)))
                    (available-queens-list '()))
-          (or (and (< rest-time *available-time*)
+          (or (and (< rest-time *available-second*)
                    (let ((queens
                           (or (find-best-next-queens client
                                                      available-queens-list
@@ -108,17 +110,21 @@
     (set! (width-of client) (get field-info 'width))
     (set! (height-of client) (get field-info 'height))
     (set! (queens-of client) (parse-field-info (get field-info 'data))))
-  (put-current-queens client))
+  (write-current-queens client))
 
-(define (put-current-queens client)
+(define (write-current-queens client)
   (tuple-space-write (tuple-space-of client)
-                     `(:current ,(queens-of client))
-                     `(,(* 2 *available-time*) 0)))
+                     `(:current ,(width-of client)
+                                ,(height-of client)
+                                ,(queens-of client))
+                     `(,(* 2 *available-second*) 0)))
 
 (define (collect-available-queens client)
   (map cadr (tuple-space-read-all (tuple-space-of client)
-                                  `((:result
-                                     (queens->pattern (queens-of client)))))))
+                                  `((:answer
+                                     ,(width-of client)
+                                     ,(height-of client)
+                                     ,(queens->pattern (queens-of client)))))))
 
 (define (find-best-next-queens client queens-list rest-players-number)
   (find (lambda (queens)
