@@ -37,13 +37,13 @@
   (define return #f)
 
   (define (next)
-    (available-hands queens width height
-                     (lambda (hand)
-                       (let/cc restart
-                         (set! next
-                               (lambda ()
-                                 (restart 'do-next)))
-                         (return hand))))
+    (terminated-hands queens width height
+                      (lambda (hand)
+                        (let/cc restart
+                          (set! next
+                                (lambda ()
+                                  (restart 'do-next)))
+                          (return hand))))
     (return #f))
 
   (lambda ()
@@ -52,33 +52,30 @@
       (next))))
 
 
-(define (available-hands-in-column queens width height column handler . args)
+(define (available-hands-in-column queens width height column handler)
+  (let loop ((row 0)
+             (found-available-hand? #f))
+    (if (= row height)
+      found-available-hand?
+      (loop (+ row 1)
+            (if (cell-free? queens width height column row)
+              (begin
+                (handler (update-queens queens column row))
+                #t)
+              found-available-hand?)))))
+
+(define (terminated-hands queens width height handler . args)
   (let-keywords* args ((column-cache-table (make-hash-table 'equal?))
                        (row-cache-table (make-hash-table 'equal?)))
-    
-    (define (call-handler-if-need new-queens)
+
+    (define (row-handler new-queens)
       (when (and (not (hash-table-exists? row-cache-table new-queens))
-                 (not (available-hands new-queens width height handler
-                                       :column-cache-table column-cache-table
-                                       :row-cache-table row-cache-table)))
+                 (not (terminated-hands new-queens width height handler
+                                        :column-cache-table column-cache-table
+                                        :row-cache-table row-cache-table)))
         (hash-table-put! row-cache-table new-queens #t)
         (handler new-queens)))
     
-    (let loop ((row 0)
-               (found-available-hand? #f))
-      (if (= row height)
-        found-available-hand?
-        (loop (+ row 1)
-              (if (cell-free? queens width height column row)
-                (let ((new-queens (update-queens queens column row)))
-                  (call-handler-if-need new-queens)
-                  #t)
-                found-available-hand?))))))
-
-(define (available-hands queens width height handler . args)
-  (let-keywords* args ((column-cache-table (make-hash-table 'equal?))
-                       (row-cache-table (make-hash-table 'equal?)))
-
     (define (search-if-no-cache)
       (let ((key (list queens width height)))
         (if (hash-table-exists? column-cache-table key)
@@ -96,9 +93,7 @@
                 (if (column-has-queen? queens column)
                   found-available-hand?
                   (or (available-hands-in-column
-                       queens width height column handler
-                       :column-cache-table column-cache-table
-                       :row-cache-table row-cache-table)
+                       queens width height column row-handler)
                       found-available-hand?))))))
 
     (search-if-no-cache)))

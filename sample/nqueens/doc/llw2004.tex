@@ -15,8 +15,8 @@
 
 \begin{flushright}
  2004年8月7日 \\
- Lightweight Language Weekend 2004 \\
- 須藤功平（COZMIXNG）／ Gauche担当
+ Lightweight Language Weekend 2004／君ならどう書く \\
+ 須藤功平（COZMIXNG）\verb|<kou@cozmixng.org>|／Gauche担当
 \end{flushright}
 
 \section{n-Queensゲーム}
@@ -48,11 +48,11 @@ FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
  \item[プレイヤー] n-Queensサーバと通信し，実際にn-Queensゲームをプレイ
 	    する．
    
-	    しかし，どこにQueenをおけばよいかは考えずに，単に現在の盤面
-	    の状態をタプルスペースに書き，解答者が解いてくれるのを待つ．
-	    自分のターンになったら解答者が解いた解答をタプルスペースから
-	    かき集め，その中から適当な解答を選択する．自分のターンに置く
-	    Queen はその解答を元に決める．
+	    プレイヤーはどこにQueenをおけばよいかは考えずに，単に現在の
+	    盤面の状態をタプルスペースに書き，解答者が解いてくれるのを待
+	    つ．自分のターンになったら解答者が解いた解答をタプルスペース
+	    からかき集め，その中から適当な解答を選択する．自分のターンに
+	    置くQueen はその解答を元に決める．
    
 	    適当な解答は以下のように選択する．上にあるものほど優先順
 	    位が高い．
@@ -64,15 +64,14 @@ FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
 	    \end{enumerate}
 
  \item[出題者] プレイヤーがタプルスペースに書いた盤面の状態をサブ問題に分
-	    割し，サブ問題をタプルスペースに書く．
+	    割し，それをタプルスペースに書く．
    
-	    出題者は以下のようなサブ問題を作成する．
+	    出題者は以下のようなサブ問題を作成する．最終状態とはもうこれ
+	    以上Queenが置けなくなる盤面の状態のことである．
 	    \begin{itemize}
-	     \item 元の盤面の状態から始めて，もうこれ以上Queenが置けなくな
-		   る盤面の状態を全て求める問題．
+	     \item 元の盤面の状態から始めて，最終状態を全て求める問題．
 	     \item 元の盤面の状態に（Queenを置ける場所に）適当にQueenを
-		   ひとつ置いた状態から始めて，もうこれ以上Queenが置けな
-		   くなる盤面の状態を全て求める問題．
+		   ひとつ置いた状態から始めて，最終状態を全て求める問題．
 	    \end{itemize}
 
  \item[解答者] 出題者が作成したサブ問題を解いて，解答をタプルスペースに
@@ -95,24 +94,27 @@ FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
    
 前置きはこのぐらいにしてプログラムの解説に入る．
 
-今回のプログラムで一番大事な部分はタプルスペースを用いた「下手な鉄砲数う
-ちゃ当たる作戦」であるが，これはSchemeっぽくないのでプログラム中で使用し
-ている継続\footnote{こっちの方がSchemeっぽいでしょ？}について解説する．
+今回のプログラムで一番大事な部分はタプルスペースを用いた「夏休み終了直前
+のこどもの宿題を家族総出で片付けよう作戦」であるが，これはSchemeっぽくな
+いのでプログラム中で使用している継続\footnote{こっちの方がSchemeっぽいで
+しょ？}について解説する．
 
 以下は解答者オブジェクト（実体は手続き）を作成するコードである．
+\texttt{terminated-hands}は順次もうこれ以上Queenが置けなくなる盤面の状態
+を求め，それを引数として，\texttt{terminated-hands}の第4引数で指定された
+手続き（以下のコードでは\texttt{(lambda (hand) $\ldots$)}）を呼び出す手続きで
+ある．
 
 \begin{alltt}
 (define (make-answerer queens width height)
   (define return #f)
 
   (define (next)
-    (available-hands queens width height
-                     (lambda (hand)
-                       (let/cc restart
-                         (set! next
-                               (lambda ()
-                                 (restart 'do-next)))
-                         (return hand))))
+    (terminated-hands queens width height
+                      (lambda (hand)
+                        (let/cc restart
+                          (set! next (lambda () (restart 'do-next)))
+                          (return hand))))
     (return #f))
 
   (lambda ()
