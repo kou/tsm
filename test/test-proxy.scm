@@ -21,7 +21,7 @@
              (let ((ts (connect-ts host port)))
                (tuple-space-shutdown! ts))
              #t)))
-      (sys-nanosleep 1000)) ; wait for starting server
+      (sys-nanosleep 100000000)) ; wait for starting server
     server))
 
 (define (test-ts-stop server)

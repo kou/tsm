@@ -46,7 +46,7 @@ tsm（Tuple Space in Scheme）は
 
 == 入手方法
 
-#((<URL:http://www.cozmixng.org/~kou/download/tsm.tar.gz>))
+((<URL:http://www.cozmixng.org/~kou/download/tsm.tar.gz>))
 
   % svn co http://www.cozmixng.org/repos/gauche/tsm/trunk tsm
 
