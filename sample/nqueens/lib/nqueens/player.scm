@@ -31,8 +31,7 @@
   (set! (xml-rpc-client-of self)
         (make-xml-rpc-client (xml-rpc-uri-of self)))
   (set! (tuple-space-of self)
-        (tuple-space-connect (tuple-space-uri-of self)))
-  (regist! self))
+        (tuple-space-connect (tuple-space-uri-of self))))
 
 (define (nqueens-play name xml-rpc-uri tuple-space-uri)
   (let ((player (make <nqueens-player>
@@ -45,52 +44,71 @@
     (player-play player)))
 
 (define (player-play player)
-  (let play-loop ((playing? #t))
+  (let play-loop ((playing? (in-play-mode? (current-mode player))))
     (when playing?
-      (let loop ((rest-time *available-second*)
-                 (rest-players-number (length (players-of player)))
+      (let loop ((player-status (call-player-status player))
                  (available-queens-list '()))
-        (or (and (< rest-time *available-second*)
-                 (let ((queens
-                        (or (find-best-next-queens player
-                                                   available-queens-list
-                                                   rest-players-number)
-                            (and (< rest-time 3)
-                                 (find-next-queens player
-                                                   available-queens-list
-                                                   rest-players-number)))))
-                   (and queens (put-queen player queens))))
-            (begin
-              (when (and (<= rest-time 1)
-                         (null? available-queens-list))
-                (print "give up")
-                '(give-up player))
-              (sys-sleep 1)
-              (update-field-info! player)
-              (if (member (id-of player) (players-of player))
-                (loop (get (call-player-status player) 'play_time)
-                      (length (get (call-status player) 'players))
-                      (collect-available-queens player))
-                (print "lost..."))))))
+        (let ((in-turn? (if (hash-table-exists? player-status 'in_turn)
+                          (get player-status 'in_turn)
+                          #t))
+              (rest-time (if (hash-table-exists? player-status 'play_time)
+                           (get player-status 'play_time)
+                           10))
+              (rest-players-number (length (players-of player))))
+          (or (and in-turn?
+                   (let ((queens
+                          (or (find-best-next-queens player
+                                                     available-queens-list
+                                                     rest-players-number)
+                              (and (< rest-time 3)
+                                   (find-next-queens player
+                                                     available-queens-list
+                                                     rest-players-number)))))
+                     (and queens (put-queen player queens))))
+              (begin
+                (when (and in-turn?
+                           (<= rest-time 1)
+                           (null? available-queens-list))
+                  (print "give up")
+                  '(give-up player))
+                (sys-sleep 1)
+                (update-field-info! player)
+                (set! (players-of player)
+                      (get (call-status player) 'players))
+                (if (member (id-of player) (players-of player))
+                  (loop (call-player-status player)
+                        (collect-available-queens player))
+                  (print "lost...")))))))
     (update-field-info! player)
     (play-loop (and (in-play? player)
                     (member (id-of player) (players-of player))))))
 
 (define (ensure-regist! player)
   (until (regist! player)
+    (print "ensure-regist!...")
+    (print-mode (current-mode player))
     (sys-sleep 1)))
 
 (define (wait-play player)
   (do ((mode (current-mode player)))
-      ((not (in-play-mode? mode))
+      ((in-play-mode? mode)
        (let ((status (call-status player)))
          (set! (players-of player) (get status 'players))))
-    (print
-     (cond ((in-standby-mode? mode) "in standby mode...")
-           ((in-accepting-mode? mode) "in accepting mode...")
-           ((in-play-mode? mode) "in play mode...")
-           (else "??? mode...")))
-    (sys-sleep 1)))
+    (let ((players (get (call-status player) 'players)))
+      (if (or (in-standby-mode? mode)
+              (and (in-accepting-mode? mode)
+                   (member (id-of player) players)))
+        (ensure-regist! player))
+      (print-mode mode)
+      (print players)
+      (sys-sleep 1))))
+
+(define (print-mode mode)
+  (print
+   (cond ((in-standby-mode? mode) "in standby mode...")
+         ((in-accepting-mode? mode) "in accepting mode...")
+         ((in-play-mode? mode) "in play mode...")
+         (else "??? mode..."))))
 
 (define (give-up player)
   (call-give-up player))
@@ -153,9 +171,11 @@
   (let ((result (call-regist player)))
     (if (get result 'result)
       (begin
-        (set! (id-of self) (get result 'player_id))
-        (set! (ticket-of self) (get result 'ticket))
-        (set! (start-time-of self) (+ (sys-time) (get result 'play_start))))
+        (print #`"registed!: id=,(get result 'player_id)")
+        (set! (id-of player) (get result 'player_id))
+        (set! (ticket-of player) (get result 'ticket))
+        (set! (start-time-of player) (get result 'play_start))
+        (sys-sleep (start-time-of player)))
       (print (get result 'reason)))
     (get result 'result)))
 

@@ -14,7 +14,7 @@
 (define (nqueens-answerer-write-answers nq-answerer)
   (let-values (((width height first-queens)
                 (read-current-queens nq-answerer)))
-    (let ((answerer (make-answerer width height first-queens)))
+    (let ((answerer (make-answerer first-queens width height)))
       (let loop ((current-queens first-queens)
                  (answer (answerer)))
         (print answer)
@@ -25,7 +25,7 @@
                                              0
                                              '(_ #f #f #f))))
             (if (or (not new-queens)
-                    (equal? first-queens currnet-queens))
+                    (equal? first-queens current-queens))
               (loop current-queens (answerer)))))))))
 
 (define (write-answer nq-answerer width height queens)
