@@ -15,7 +15,7 @@
 (define-class <nqueens-player> ()
   ((name :accessor name-of :init-keyword :name)
    (xml-rpc-uri :accessor xml-rpc-uri-of :init-keyword :xml-rpc-uri)
-   (xml-rpc-player :accessor xml-rpc-player-of)
+   (xml-rpc-client :accessor xml-rpc-client-of)
    (tuple-space-uri :accessor tuple-space-uri-of :init-keyword :tuple-space-uri)
    (tuple-space :accessor tuple-space-of)
    (ticket :accessor ticket-of)
@@ -28,8 +28,8 @@
 
 (define-method initialize ((self <nqueens-player>) args)
   (next-method)
-  (set! (xml-rpc-player-of self)
-        (make-xml-rpc-player (xml-rpc-uri-of self)))
+  (set! (xml-rpc-client-of self)
+        (make-xml-rpc-client (xml-rpc-uri-of self)))
   (set! (tuple-space-of self)
         (tuple-space-connect (tuple-space-uri-of self)))
   (regist! self))
@@ -181,7 +181,7 @@
   (= 2 (current-mode player)))
 
 (define-method call ((self <nqueens-player>) name . args)
-  (apply call (xml-rpc-player-of self) name args))
+  (apply call (xml-rpc-client-of self) name args))
 
 (define (call-llw player name alist)
   (let ((method-name #`"LLW2004NQ.,|name|"))
@@ -190,32 +190,32 @@
       (call player method-name (alist->hash-table alist 'eq?)))))
 
 (define (call-regist player)
-  (call-llw player "regist" `((name ,(name-of player)))))
+  (call-llw player "regist" `((name . ,(name-of player)))))
 
 (define (call-status player)
   (call-llw player "status" '()))
 
 (define (call-player-status player)
-  (call-llw player "playerStatus" `((player_id ,(id-of player)))))
+  (call-llw player "playerStatus" `((player_id . ,(id-of player)))))
 
 (define (call-field-info player)
   (call-llw player "fieldInfo" '()))
 
 (define (call-put-queen player x y)
-  (call-llw player "putQueen" `((player_id ,(id-of player))
-                                (ticket ,(ticket-of player))
-                                (x ,x)
-                                (y ,y))))
+  (call-llw player "putQueen" `((player_id . ,(id-of player))
+                                (ticket . ,(ticket-of player))
+                                (x . ,x)
+                                (y . ,y))))
 
 (define (call-give-up player)
-  (call-llw player "giveUp" `((player_id ,(id-of player))
-                              (ticket ,(ticket-of player)))))
+  (call-llw player "giveUp" `((player_id . ,(id-of player))
+                              (ticket . ,(ticket-of player)))))
 
 (define (call-log player . index)
   (call-llw player "log"
             (if (null? index)
               '()
-              `((index ,(car index))))))
+              `((index . ,(car index))))))
 
 
 (define (remove-empty-row rows)
