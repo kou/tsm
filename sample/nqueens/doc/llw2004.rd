@@ -14,7 +14,7 @@
   * タプルスペースを使用
 
   # image
-  # src = system-architecture.png
+  # src = system-architecture.eps
   # keep_scale = true
   # relative_height = 70
 
@@ -30,10 +30,33 @@
 
   * イベントドリブン(('rightarrow:'))プルイベント
 
-  * イベントドリブン
-    * イベントが発生すると通知
-  * プルイベント
-    * イベントを自分で発生
+  # image
+  # src = event.eps
+  # keep_scale = true
+  # relative_width = 90
+
+= イベントドリブン例
+
+  (for-each print '(1 2 3))
+  ;; 1
+  ;; 2
+  ;; 3
+
+= プルイベント例
+
+  (pull)
+  ;; -> 1
+  (pull)
+  ;; -> 2
+  (pull)
+  ;; -> 3
+
+= 適用
+
+  (手続きとか 引数...)
+
+  (+ 1 2)
+  ;; -> 3
 
 = 定義
 
@@ -42,6 +65,8 @@
 
 = 条件分岐
 
+  (if 条件式 真の場合 偽の場合)
+  
   (if #t 1 2)
   ;; -> 1
 
@@ -60,12 +85,39 @@
   back
   ;; -> 100
 
-= 継続
+= 継続の例
+
+  (call/cc
+    (lambda (継続)
+      (print 1)
+      (継続 返す値)
+      ここには来ない))
+  ;; 1
+  ;; -> 返す値
+
+= let/cc
 
   (call/cc
     (lambda (cont)
-      (set! back cont)
-      #f))
+      ...))
+
+  (let/cc cont
+     ...)
+
+= 継続の例
+
+  (let/cc 継続
+    (print 1)
+    (継続 返す値)
+    ここには来ない)
+  ;; 1
+  ;; -> 返す値
+
+= 継続の代入
+
+  (let/cc cont
+    (set! back cont)
+    #f)
   ;; -> #f
 
 = 起動
@@ -78,20 +130,19 @@
 
 = 継続
 
-  (call/cc
-    (lambda (cont)
-      (set! back cont)
-      #f))
+  (let/cc cont
+    (set! back cont)
+    #f)
   ;; -> go-back
 
-= let/cc
+= 本題
 
-  (call/cc
-    (lambda (cont)
-      ...))
+  * イベントドリブン(('rightarrow:'))プルイベント
 
-  (let/cc cont
-     ...)
+  # image
+  # src = event.eps
+  # keep_scale = true
+  # relative_width = 90
 
 = イベントドリブン
 
@@ -102,7 +153,7 @@
   ;; 2
   ;; 3
 
-= プルイベント使用法
+= プルイベント
 
   (define pull (make-pull))
   (pull)
@@ -112,7 +163,14 @@
   (pull)
   ;; -> 3
 
-= プルイベント
+= 方針
+
+  # image
+  # src = event-driven-to-pull-event.eps
+  # keep_scale = true
+  # relative_width = 90
+
+= (({make-pull}))
 
   (define (make-pull)
     (define return #f)
@@ -123,7 +181,7 @@
         (set! return cont)
         (next))))
 
-= next
+= (({next}))
 
   (define (next)
     (for-each
@@ -151,16 +209,27 @@
       (set! next
         (lambda ()
           (do-next #f)))
-       (return x)))
+      (return x)))
+
+= 完成
+
+  (define pull (make-pull))
+  (pull)
+  ;; -> 1
+  (pull)
+  ;; -> 2
+  (pull)
+  ;; -> 3
 
 = 復習
 
   (let/cc 継続
-    ...
-    継続を起動した時は
-    ここは評価されない)
+    継続を代入
 
-= 例
+    一度だけ評価されるコード
+    初期化コードとか)
+
+= 復習例
 
   (let/cc cont
     (set! finish cont)
@@ -168,10 +237,9 @@
 
 = 継続
 
-  (call/cc
-    (lambda (cont)
-      (set! back cont)
-      #f))
+  (let/cc cont
+    (set! back cont)
+    #f)
   ;; -> go-back
 
 = 起動
@@ -182,13 +250,14 @@
   ;; ???
   (back 'go-back)
 
-= 例
+= 復習例
 
   (let/cc cont
     (set! finish cont)
     (back 'go-back))
   ;; -> #f
 
-= まとめ
+= 続きまして
 
-継続ってどうなってるの？
+  (pull-next-language)
+  ;; -> Ruby

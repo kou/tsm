@@ -50,11 +50,13 @@
                  (available-queens-list '()))
         (let ((in-turn? (if (hash-table-exists? player-status 'in_turn)
                           (get player-status 'in_turn)
-                          #t))
+                          #f))
               (rest-time (if (hash-table-exists? player-status 'play_time)
                            (get player-status 'play_time)
-                           10))
+                           2))
               (rest-players-number (length (players-of player))))
+          (print (list in-turn? rest-time rest-players-number))
+          (print-mode (current-mode player))
           (or (and in-turn?
                    (let ((queens
                           (or (find-best-next-queens player
@@ -175,6 +177,7 @@
         (set! (id-of player) (get result 'player_id))
         (set! (ticket-of player) (get result 'ticket))
         (set! (start-time-of player) (get result 'play_start))
+        (print #`"waiting for starting...: ,(get result 'play_start) sec.")
         (sys-sleep (start-time-of player)))
       (print (get result 'reason)))
     (get result 'result)))

@@ -1,4 +1,9 @@
 images: \
+	event.png \
+	event.eps \
+	event-driven-to-pull-event.png \
+	event-driven-to-pull-event.eps \
+	system-architecture.png \
 	system-architecture.png \
 	system-architecture.eps
 
