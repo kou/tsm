@@ -68,9 +68,9 @@
 
 (define (ts-write space value . args)
   ;; (print "write:" value)
-  (let-optionals* args ((sec #f))
+  (let-optionals* args ((timeout #f))
     (push! (tuples-of space)
-           (make-tuple value :expiration-time sec))))
+           (make-tuple value :expiration-time timeout))))
 
 
 (define (ts-search space patterns need-more?)
