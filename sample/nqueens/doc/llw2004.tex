@@ -1,12 +1,12 @@
 \documentclass[a4paper]{jarticle}
 
-\oddsidemargin = 0mm
+\oddsidemargin = -5mm
 \headheight = 0mm
-\topmargin = -2mm
+\topmargin = 0mm
 \headsep = 0mm
 \marginparwidth = 0mm
-\textwidth = 165mm
-\textheight = 250mm
+\textwidth = 170mm
+\textheight = 240mm
 
 \usepackage{alltt}
 \usepackage{graphicx}
@@ -38,7 +38,7 @@ FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
 に示す．
 \begin{figure}[b]
  \begin{center}
-  \includegraphics[width=0.5\textwidth]{system-architecture.eps}
+  \includegraphics[width=0.4\textwidth]{system-architecture.eps}
   \caption{システム構成}
   \label{fig:system-architecture}
  \end{center}
@@ -92,8 +92,6 @@ FreeBSD上でのpthreadと相性が悪いようで，スレッドは使えない．}，数にもの
 
 \section{プログラム}
    
-前置きはこのぐらいにしてプログラムの解説に入る．
-
 今回のプログラムで一番大事な部分はタプルスペースを用いた「夏休み終了直前
 のこどもの宿題を家族総出で片付けよう作戦」であるが，これはSchemeっぽくな
 いのでプログラム中で使用している継続\footnote{こっちの方がSchemeっぽいで
