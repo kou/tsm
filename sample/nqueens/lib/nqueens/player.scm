@@ -67,6 +67,7 @@
               (print (list in-turn? rest-time
                            rest-players-number 'available-queens-list))
               (or (and in-turn?
+                       (or (update-field-info! player #f) #t)
                        (let ((queens
                               (or (find-best-next-queens player
                                                          available-queens-list
@@ -77,7 +78,7 @@
                          (print #`"found queens: ,queens")
                          (and queens
                               (put-queen player queens)
-                              (or (sys-sleep (truncate (/ rest-time 2)))
+                              (or (sys-sleep rest-time)
                                   #t))))
                   (begin
                     (when (and in-turn?
@@ -153,14 +154,15 @@
         (print "give up????")
         #f))))
 
-(define (update-field-info! player)
+(define (update-field-info! player . write-current?)
   (let ((field-info (call-field-info player)))
     (set! (width-of player) (get field-info 'width))
     (set! (height-of player) (get field-info 'height))
     (set! (queens-of player) (parse-field-info (get field-info 'data))))
-  (print #`"writing queens: width=,(width-of player) height=,(height-of player) queens=,(queens-of player)")
-  (write-current-queens player)
-  (print "wrote queens"))
+  (when (get-optional write-current? #t)
+    (print #`"writing queens: width=,(width-of player) height=,(height-of player) queens=,(queens-of player)")
+    (write-current-queens player)
+    (print "wrote queens")))
 
 (define (write-current-queens player)
   (tuple-space-write (tuple-space-of player)

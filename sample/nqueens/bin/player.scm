@@ -5,9 +5,9 @@
 (define *tuple-space-host* "localhost")
 (define *tuple-space-port* 5959)
 
-(define *xml-rpc-host* "www.vdomains.org")
+(define *xml-rpc-host* "192.168.0.17")
 (define *xml-rpc-port* 80)
-(define *xml-rpc-path* "/~koyama/llwnq/nqueen.php")
+(define *xml-rpc-path* "/nqueen.php")
 
 (define (main args)
   (nqueens-play "Gauche n-Queens player"

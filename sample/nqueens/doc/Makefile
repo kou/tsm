@@ -1,4 +1,6 @@
 images: \
+	do-next.png \
+	do-next.eps \
 	event.png \
 	event.eps \
 	event-driven-to-pull-event.png \
