@@ -10,7 +10,7 @@
 (define *xml-rpc-path* "/~koyama/llwnq/nqueen.php")
 
 (define (main args)
-  (nqueens-play "Gauche n-Queens player"
+  (nqueens-play #`"Gauche n-Queens player ,(cadr args)"
                 (format #f "http://~a:~a~a"
                         *xml-rpc-host* *xml-rpc-port* *xml-rpc-path*)
                 (format #f "dsmp://~a:~a"

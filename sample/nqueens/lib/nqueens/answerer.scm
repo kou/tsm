@@ -17,7 +17,7 @@
     (let ((answerer (make-answerer first-queens width height)))
       (let loop ((current-queens first-queens)
                  (answer (answerer)))
-        ;; (print answer)
+        '(print answer)
         (when answer
           (write-answer nq-answerer width height answer)
           (let-values (((_ _ new-queens)

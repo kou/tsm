@@ -12,11 +12,17 @@
   * ひたすら手を計算
 
   * タプルスペースを使用
+    * 相性問題
+      * GaucheとFreeBSDとスレッド
+    * せっかく作ったから
+    * 作ろうと思っていたし
+
+= イメージ
 
   # image
   # src = system-architecture.eps
   # keep_scale = true
-  # relative_height = 70
+  # relative_height = 90
 
 = なんだけど
 
@@ -44,118 +50,6 @@
 
 = プルイベント例
 
-  (pull)
-  ;; -> 1
-  (pull)
-  ;; -> 2
-  (pull)
-  ;; -> 3
-
-= 適用
-
-  (手続きとか 引数...)
-
-  (+ 1 2)
-  ;; -> 3
-
-= 定義
-
-  (define finish #f)
-  (define back #f)
-
-= 条件分岐
-
-  (if 条件式 真の場合 偽の場合)
-  
-  (if #t 1 2)
-  ;; -> 1
-
-= 手続き
-
-  (lambda () #f)
-  ;; -> 手続き
-
-  ((lambda (x) (+ 10 x))
-   20)
-  ;; -> 30
-
-= 代入
-
-  (set! back 100)
-  back
-  ;; -> 100
-
-= 継続の例
-
-  (call/cc
-    (lambda (継続)
-      (print 1)
-      (継続 返す値)
-      ここには来ない))
-  ;; 1
-  ;; -> 返す値
-
-= let/cc
-
-  (call/cc
-    (lambda (cont)
-      ...))
-
-  (let/cc cont
-     ...)
-
-= 継続の例
-
-  (let/cc 継続
-    (print 1)
-    (継続 返す値)
-    ここには来ない)
-  ;; 1
-  ;; -> 返す値
-
-= 継続の代入
-
-  (let/cc cont
-    (set! back cont)
-    #f)
-  ;; -> #f
-
-= 起動
-
-  (if finish
-    (finish #f)
-    #f)
-  ;; -> #f
-  (back 'go-back)
-
-= 継続
-
-  (let/cc cont
-    (set! back cont)
-    #f)
-  ;; -> go-back
-
-= 本題
-
-  * イベントドリブン(('rightarrow:'))プルイベント
-
-  # image
-  # src = event.eps
-  # keep_scale = true
-  # relative_width = 90
-
-= イベントドリブン
-
-  (for-each (lambda (x)
-              (print x))
-            '(1 2 3))
-  ;; 1
-  ;; 2
-  ;; 3
-
-= プルイベント
-
-  (define pull (make-pull))
   (pull)
   ;; -> 1
   (pull)
@@ -220,42 +114,6 @@
   ;; -> 2
   (pull)
   ;; -> 3
-
-= 復習
-
-  (let/cc 継続
-    継続を代入
-
-    一度だけ評価されるコード
-    初期化コードとか)
-
-= 復習例
-
-  (let/cc cont
-    (set! finish cont)
-    (back 'go-back))
-
-= 継続
-
-  (let/cc cont
-    (set! back cont)
-    #f)
-  ;; -> go-back
-
-= 起動
-
-  (if finish
-    (finish #f)
-    #f)
-  ;; ???
-  (back 'go-back)
-
-= 復習例
-
-  (let/cc cont
-    (set! finish cont)
-    (back 'go-back))
-  ;; -> #f
 
 = 続きまして
 
