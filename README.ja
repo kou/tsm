@@ -39,6 +39,11 @@ tsm（Tuple Space in (on??) Scheme）は
   * move（クライアントにタプルを返すのが成功したらタプルスペー
     スからタプルを削除する安全なtake）
 
+== 依存ライブラリ
+
+  * ((<dsm|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=dsm>))
+  * ((<marshal|URL:http://www.cozmixng.org/~rwiki/?cmd=view;name=marshal>))
+
 == 入手方法
 
 #((<URL:http://www.cozmixng.org/~kou/download/tsm.tar.gz>))
@@ -146,3 +151,68 @@ Bのコードは以下のようになります．
                                     '(('to-B ((? number?) ...))))))))
 
 (({tuple-space-take}))には
+
+== 例1
+
+あるタスク（writerとします）はタプルを書き込みまくり，別のタ
+スク（readerとします）はタプルを取り出しまくってみましょう．
+
+以下の3つのファイルを作成します．
+
+  * tuple-space.scm
+  * writer.scm
+  * reader.scm
+
+=== tuple-space.scm
+
+  #!/usr/bin/env gosh
+
+  (use tsm.tuple-space)
+
+  (define *port* 2929)
+
+  (define (main args)
+    (let ((tuple-space (make-tuple-space #`"dsmp://:,|*port*|")))
+      (tuple-space-start! tuple-space)
+      (tuple-space-join! tuple-space)))
+
+=== writer.scm
+
+  #!/usr/bin/env gosh
+
+  (use srfi-1)
+  (use tsm.proxy)
+
+  (define *server* "localhost")
+  (define *port* 2929)
+
+  (define (main args)
+    (let ((tuple-space (tuple-space-connect #`"dsmp://,|*server*|:,|*port*|")))
+      (for-each (lambda (i)
+                  (tuple-space-write tuple-space i '(1 0))
+                  (tuple-space-write tuple-space (list i)))
+                (iota 10))))
+
+=== reader.scm
+
+  #!/usr/bin/env gosh
+
+  (use tsm.proxy)
+
+  (define *server* "localhost")
+  (define *port* 2929)
+
+  (define (main args)
+    (let ((tuple-space (tuple-space-connect #`"dsmp://,|*server*|:,|*port*|")))
+      (do ()
+          (#f)
+        (print (tuple-space-take tuple-space '(_))))))
+
+=== 起動する．
+
+最初にtuple-space.scmを起動しておけば，writer.scmと
+reader.scmはどのような順序で起動しても構いません．writer.scm
+とreader.scmを複数起動しても構いません．
+
+すべて起動すると，writer.scmが書き込んだタプルをreader.scmが
+ひたすら吐き出します．
