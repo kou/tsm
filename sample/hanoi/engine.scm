@@ -3,6 +3,7 @@
 (use gauche.interactive)
 (use srfi-1)
 (use tsm.proxy)
+(use util.match)
 
 (define *server* "localhost")
 (define *port* 8011)
@@ -20,9 +21,7 @@
                  id)
                 ((eq? 'read command)
                  (caddr (tuple-space-take tuple-space
-                                          `((:tower ,id _))
-                                          ;; :timeout 6000000
-                                          )))
+                                          `((:tower ,id _)))))
                 (else
                  (apply do-command id command args)))))
 
@@ -34,8 +33,7 @@
           (unless (every (lambda (tower)
                            (null? (tuple-space-read-all
                                    tuple-space
-                                   `((:tower-do ,(tower 'id)
-                                                _ ...)))))
+                                   `((:tower-do ,(tower 'id) _ ...)))))
                          towers)
             (loop))))
       

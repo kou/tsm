@@ -59,16 +59,13 @@
     (set! (last-update-time-of space)
           (current-time))))
 
-(use gauche.interactive)
 (define (ts-write space lst . args)
-  (print "write" lst)
   (let-optionals* args ((sec #f))
     (push! (tuples-of space)
            (make-tuple lst :expiration-time sec))))
 
 
 (define (ts-search space pattern need-more?)
-  (print "search" pattern)
   (let ((matched? #f))
     (parameterize ((current-patterns pattern))
       (partition (lambda (tuple)

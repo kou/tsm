@@ -32,12 +32,13 @@
 (define (pole drawable width hight fg bg)
   ;; clear
   (gdk-draw-rectangle drawable bg #t 0 0 width hight)
-  ;; draw line
+  ;; draw pole
   (gdk-draw-rectangle drawable fg #t
                       (pole-base-x width)
                       0
                       (/ (disk-width width) 2)
                       hight)
+  ;; draw border line
   (let ((dw (disk-width width)))
     (let loop ((x dw))
       (when (< x width)
@@ -58,7 +59,6 @@
         (loop (cdr ds))))))
 
 (define (tower-gtk-main args tuple-space)
-  (set! actions (make-queue))
   (let-optionals* (cdr args) ((server #f)
                               (width 600)
                               (hight 480))
@@ -72,18 +72,18 @@
              (hight (x->integer hight))
              (finished? #f)
              (sequence 0)
-             (tower-id '_))
+             (tower-id '_)
+             (actions (make-queue)))
         (define (next-action)
           (if finished?
             #f
             (begin
-              ;; (print sequence)
-              ;; (print `((:tower-action ,tower-id ,sequence (_ ...))))
               (with-error-handler
                   (lambda (e) #f)
                 (lambda ()
                   (match (tuple-space-take tuple-space
-                                           `((:tower-action ,tower-id ,sequence (_ ...)))
+                                           `((:tower-action ,tower-id ,sequence
+                                                            (_ ...)))
                                            :timeout 100000)
                     ((_ id seq action)
                      (print seq)
@@ -102,20 +102,15 @@
                             (set! fg-gc (gdk-gc-new drawable))
                             (set! bg-gc (gdk-gc-new drawable))
                             (gdk-gc-set-foreground bg-gc
-                                                   (ref (ref (ref area 'style) 'bg) 0))
+                                                   (ref (ref (ref area 'style)
+                                                             'bg)
+                                                        0))
                             ))
         (g-signal-connect area "expose_event"
                           (lambda (w event)
                             (pole drawable width hight fg-gc bg-gc))
                           (lambda (w event)
-                            (disk drawabel width hight fg-gc bg-gc)))
-        '(gtk-timeout-add 100
-                         (lambda ()
-                           (unless finished?
-                             (let ((action (next-action)))
-                               (if action
-                                 (enqueue! actions action))))
-                           #t))
+                            (disk drawable width hight fg-gc bg-gc)))
         (gtk-timeout-add update-span
                          (lambda ()
                            (unless finished?
@@ -127,7 +122,7 @@
                            (when drawable
                              (unless (queue-empty? actions)
                                (let ((action (dequeue! actions)))
-                                 (print action)
+                                 ;; (print action)
                                  (case (car action)
                                    ((start)
                                     (set! disks '())
@@ -143,9 +138,7 @@
                                     (set! finished? #t)
                                     (set! tower-id '_))
                                    (else
-                                    (print "????: " action))))
-                               (print 222))
-                             (print 111)
+                                    (print "????: " action)))))
                              (disk drawable width hight fg-gc bg-gc))
                            #t))
         (gtk-widget-show area)
@@ -154,11 +147,12 @@
   (gtk-main)
   0)
 
-(define actions '((start) (name "left")
-                  (push 2) (push 1) (push 0)
-                  (pop 0) (pop 1) (pop 2)
-                  (finish)))
 
-(define (main args)
-  (gtk-init args)
-  (tower-gtk-main args actions))
+;; (define actions '((start) (name "left")
+;;                   (push 2) (push 1) (push 0)
+;;                   (pop 0) (pop 1) (pop 2)
+;;                   (finish)))
+
+;; (define (main args)
+;;   (gtk-init args)
+;;   (tower-gtk-main args actions))

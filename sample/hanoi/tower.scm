@@ -62,11 +62,6 @@
                    (exit-handler tower tuple-space))
                   (else
                    (set! (disks-of tower) '())
-;;                    (unless (alive?)
-;;                      (tuple-space-write tuple-space
-;;                                         (list :tower (id-of tower) #f)
-;;                                         60))
-
                    (tuple-space-write tuple-space
                                       (list :tower (id-of tower) #f))
                    (loop (next-command)))))
