@@ -32,7 +32,7 @@
 
 = 例
 
-  * イベントドリブン(('rightarrow:'))プルイベント
+  * イベントドリブン(('&rightarrow;'))プルイベント
 
   # image
   # src = event.png
@@ -134,20 +134,20 @@
 
   (+ 1 2)
 
-* (({1}))を評価 (('rightarrow:')) 1
-* (({2}))を評価 (('rightarrow:')) 2
-* (({+}))を評価 (('rightarrow:')) 足す手続き
-* (({(+ 1 2)}))を評価 (('rightarrow:')) 3
+* (({1}))を評価 (('&rightarrow;')) 1
+* (({2}))を評価 (('&rightarrow;')) 2
+* (({+}))を評価 (('&rightarrow;')) 足す手続き
+* (({(+ 1 2)}))を評価 (('&rightarrow;')) 3
 
 = 今回の場合
 
    (+ 1 (let/cc ...))
 
-* (({1}))を評価 (('rightarrow:')) 1
-* (({(let/cc ...)}))を評価 (('rightarrow:')) (({XXX}))
+* (({1}))を評価 (('&rightarrow;')) 1
+* (({(let/cc ...)}))を評価 (('&rightarrow;')) (({XXX}))
   * この時点の継続を保存
-* (({+}))を評価 (('rightarrow:')) 足す手続き
-* (({(+ 1 (let/cc ...))}))を評価 (('rightarrow:')) ???
+* (({+}))を評価 (('&rightarrow;')) 足す手続き
+* (({(+ 1 (let/cc ...))}))を評価 (('&rightarrow;')) ???
 
 = では続きを
 
