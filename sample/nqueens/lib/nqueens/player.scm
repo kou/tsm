@@ -11,6 +11,7 @@
 (select-module nqueens.player)
 
 (define get hash-table-get)
+(define exists? hash-table-exists?)
 
 (define-class <nqueens-player> ()
   ((name :accessor name-of :init-keyword :name)
@@ -44,59 +45,68 @@
     (player-play player)))
 
 (define (player-play player)
-  (let play-loop ((playing? (in-play-mode? (current-mode player))))
+  (let play-loop ()
+    (define playing?
+      (let* ((status (call-status player))
+             (mode (get status 'mode)))
+        (set! (players-of player) (get status 'players))
+        (and (in-play-mode? mode)
+             (member (id-of player) (players-of player)))))
     (when playing?
       (define available-queens-list (collect-available-queens player))
       (let loop ((available-queens-list available-queens-list)
                  (player-status (call-player-status player))
                  (mode (current-mode player)))
         (print-mode mode)
-        (let ((in-turn? (get player-status 'in_turn))
-              (rest-time (get player-status 'play_time))
-              (rest-players-number (length (players-of player))))
-          (print (list in-turn? rest-time
-                       rest-players-number 'available-queens-list))
-          (or (and in-turn?
-                   (or (update-field-info! player) #t)
-                   (let ((queens
-                          (or (find-best-next-queens player
-                                                     available-queens-list
-                                                     rest-players-number)
-                              (find-next-queens player
-                                                available-queens-list
-                                                rest-players-number))))
-                     (print #`"found queens: ,queens")
-                     (and queens
-                          (put-queen player queens)
-                          (or (sys-sleep rest-time) #t))))
-              (begin
-                (when (and in-turn?
-                           (<= rest-time 1)
-                           (null? available-queens-list))
-                  (print "give up")
-                  (give-up player))
-                (update-field-info! player)
-                (let* ((available-queens-list (collect-available-queens player))
-                       (player-status (call-player-status player))
-                       (status (call-status player))
-                       (mode (get status 'mode)))
-                  (set! (players-of player) (get status 'players))
-                  (print (list (id-of player) (players-of player)
-                               (member (id-of player) (players-of player))))
-                  (print "---------------")
-                  (print-mode mode)
-                  (print (in-play-mode? mode))
-                  (print "---------------")
-                  (if (in-play-mode? mode)
-                    (if (member (id-of player) (players-of player))
-                      (loop available-queens-list
-                            player-status
-                            mode)
-                      (print "lost..."))
-                    (print "finished???")))))))
+        (if (not (exists? player-status 'in_turn))
+          (print "Uhmmm... in_turn not found")
+          (begin
+            (let ((in-turn? (get player-status 'in_turn))
+                  (rest-time (get player-status 'play_time))
+                  (rest-players-number (length (players-of player))))
+              (print (list in-turn? rest-time
+                           rest-players-number 'available-queens-list))
+              (or (and in-turn?
+                       (let ((queens
+                              (or (find-best-next-queens player
+                                                         available-queens-list
+                                                         rest-players-number)
+                                  (find-next-queens player
+                                                    available-queens-list
+                                                    rest-players-number))))
+                         (print #`"found queens: ,queens")
+                         (and queens
+                              (put-queen player queens)
+                              (or (sys-sleep (truncate (/ rest-time 2)))
+                                  #t))))
+                  (begin
+                    (when (and in-turn?
+                               (<= rest-time 1)
+                               (null? available-queens-list))
+                      (print "give up")
+                      (give-up player))
+                    (update-field-info! player)
+                    (let* ((available-queens-list
+                            (collect-available-queens player))
+                           (player-status (call-player-status player))
+                           (status (call-status player))
+                           (mode (get status 'mode)))
+                      (set! (players-of player) (get status 'players))
+                      (print (list (id-of player) (players-of player)
+                                   (member (id-of player) (players-of player))))
+                      (print "---------------")
+                      (print-mode mode)
+                      (print (in-play-mode? mode))
+                      (print "---------------")
+                      (if (in-play-mode? mode)
+                        (if (member (id-of player) (players-of player))
+                          (loop available-queens-list
+                                player-status
+                                mode)
+                          (print "lost..."))
+                        (print "finished???")))))))))
       (update-field-info! player)
-      (play-loop (and (in-play? player)
-                      (member (id-of player) (players-of player)))))))
+      (play-loop))))
 
 (define (ensure-regist! player)
   (until (regist! player)
@@ -134,7 +144,8 @@
       (let ((result (call-put-queen player x y)))
         (print #`"putting queen: ,x ,y")
         (let ((success? (get result 'result)))
-          (unless success?
+          (if success?
+            (print "success!!")
             (print #`"failed put queen: ,(get result 'reason)"))
           success?))
       (begin
